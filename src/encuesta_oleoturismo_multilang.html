@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+  <title>Encuesta Oleoturismo</title>
+  <style>
+    html {
+      background-color: #e8e3da;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      overflow-x: hidden;
+      font-size: 16px;
+      line-height: 1.8;
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    }
+
+    img {
+      max-width: 16rem;
+    }
+
+    h2 {
+      font-size: 24px;
+      text-align: center;
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    }
+
+    button {
+      margin: 0 2px 16px 0;
+      padding: 10px;
+      background-color: #928b5f;
+    }
+
+    .btn-pos {
+      text-align: center;
+    }
+
+    .img-pos {
+      text-align: center;
+      margin-left: -5px;
+      margin-top: -45px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    label {
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <div class="img-pos"><img src="./assets/Logo Mendoza Oliva Bien.png" alt="Logo de Mendoza Oliva Bien"></div>
+
+    <h2 id="title">Encuesta Oleoturismo - Octubre</h2>
+    <div class="lang-buttons btn-pos">
+      <button onclick="setLanguage('es')">🇪🇸 Español</button>
+      <button onclick="setLanguage('en')">🇬🇧 English</button>
+      <button onclick="setLanguage('pt')">🇧🇷 Português</button>
+    </div>
+
+    <!-- <div>
+      <label id="lbl_establecimiento">Establecimiento:
+        <select id="establecimiento"></select>
+      </label>
+    </div> -->
+
+    <!-- <h3 id="subtitle">Cuestionario</h3> -->
+    <label id="lbl_pais">1. País de residencia:
+      <input type="text" id="pais">
+    </label>
+
+    <label id="lbl_estadia">2. Duración de estadía en Mendoza:
+      <input type="text" id="estadia" placeholder="Ej: 3 noches, solo por el día">
+    </label>
+
+    <label id="lbl_motivo">3. Motivo principal de la visita:
+      <select id="motivo">
+        <option value="">Seleccione...</option>
+        <option value="turismo" id="turismo">Turismo/ocio</option>
+        <option value="excursion" id="excursion">Excursión organizada</option>
+        <option value="trabajo" id="trabajo">Trabajo/negocios</option>
+        <option value="educativo" id="educativo">Visita educativa</option>
+        <option value="educativo" id="producto">Adquirir productos</option>
+        <option value="otro" id="otro">Otro</option>
+      </select>
+    </label>
+
+    <label id="lbl_primera">4. ¿Es su primera vez en esta almazara?
+      <select id="primera">
+        <option value="">Seleccione...</option>
+        <option value="si" id="primera_si">Sí</option>
+        <option value="no" id="primera_no">No</option>
+      </select>
+    </label>
+
+    <label id="lbl_origen">5. ¿Cómo se enteró de esta experiencia?
+      <select id="origen">
+        <option value="">Seleccione...</option>
+        <option value="redes" id="redes">Redes sociales</option>
+        <option value="web" id="web">Web del establecimiento</option>
+        <option value="recomendacion" id="recomendacion">Recomendación</option>
+        <option value="hotel" id="hotel">Hotel/agencia</option>
+        <option value="ruta" id="ruta">Señalización en ruta</option>
+        <option value="otro" id="otro">Otro</option>
+      </select>
+    </label>
+
+    <label id="lbl_actividades">6. Actividades realizadas:
+      <input type="text" id="actividades" placeholder="Ej: Visita guiada, degustación">
+    </label>
+
+    <label id="lbl_compra">7. ¿Compró o comprará productos hoy aquí?
+      <select id="compra">
+        <option value="">Seleccione...</option>
+        <option value="si" id="compra_si">Sí</option>
+        <option value="no" id="compra_no">No</option>
+      </select>
+    </label>
+
+    <label id="lbl_gasto">8. Gasto estimado (grupo):
+      <select id="gasto">
+        <option value="">Seleccione...</option>
+        <option value="<10k">
+          <$10.000 </option>
+        <option value="10-25k">$10.000–$25.000</option>
+        <option value="25-50k">$25.000–$50.000</option>
+        <option value=">50k">>$50.000</option>
+      </select>
+    </label>
+
+    <label id="lbl_nps">9. ¿Volvería o recomendaría esta experiencia? (0-10)
+      <input type="number" id="nps" min="0" max="10">
+    </label>
+
+    <label id="lbl_edad">10. Edad:
+      <select id="edad">
+        <option value="">Seleccione...</option>
+        <option value="16-24">16–24</option>
+        <option value="25-34">25–34</option>
+        <option value="35-44">35–44</option>
+        <option value="45-54">45–54</option>
+        <option value="55-64">55–64</option>
+        <option value="65+">65+</option>
+      </select>
+    </label>
+
+    <div class="btn-pos"><button onclick="guardarEncuesta()" id="btn_save">Guardar encuesta</button></div>
+    <script>
+      const translations = {
+        es: {
+          title: "Encuesta Oleoturismo - Octubre",
+          subtitle: "Cuestionario",
+          /* lbl_establecimiento: "Establecimiento:", */
+          lbl_pais: "1. País de residencia:",
+          lbl_estadia: "2. Duración de estadía en Mendoza:",
+          lbl_motivo: "3. Motivo principal de la visita:",
+          lbl_primera: "4. ¿Es su primera vez en esta almazara?",
+          lbl_origen: "5. ¿Cómo se enteró de esta experiencia?",
+          lbl_actividades: "6. Actividades realizadas:",
+          lbl_compra: "7. ¿Compró o comprará productos hoy aquí?",
+          lbl_gasto: "8. Gasto estimado (grupo):",
+          lbl_nps: "9. ¿Volvería o recomendaría esta experiencia? (0-10)",
+          lbl_edad: "10. Edad:",
+          btn_save: "Guardar encuesta",
+          lbl_progress: "Progreso",
+          primera_si: "Si",
+          primera_no: "No",
+          compra_si: "Si",
+          compra_no: "No",
+          turismo: "Turismo",
+          excursion: "Excursión organizada",
+          trabajo: "Trabajo/Negocios",
+          educativo: "Excursión educativa",
+          otro: "Otro",
+          redes: "Redes sociales",
+          web: "Web del establecimiento",
+          recomendacion: "Recomendación",
+          hotel: "Hotel/agencia",
+          ruta: "Señalización en ruta",
+          producto: "Adquirir productos"
+        },
+        en: {
+          title: "Olive Tourism Survey - October",
+          subtitle: "Questionnaire",
+          lbl_establecimiento: "Establishment:",
+          lbl_pais: "1. Country of residence:",
+          lbl_estadia: "2. Length of stay in Mendoza:",
+          lbl_motivo: "3. Main reason for visit:",
+          lbl_primera: "4. First time at this olive mill?",
+          lbl_origen: "5. How did you hear about this experience?",
+          lbl_actividades: "6. Activities performed:",
+          lbl_compra: "7. Did you buy or will you buy products today here?",
+          lbl_gasto: "8. Estimated group spending:",
+          lbl_nps: "9. Would you return or recommend this experience? (0-10)",
+          lbl_edad: "10. Age:",
+          btn_save: "Save survey",
+          btn_export: "Export CSV",
+          lbl_progress: "Progress",
+          primera_si: "Yes",
+          compra_si: "Yes",
+          compra_no: "No",
+          primera_no: "No",
+          turismo: "Tourism",
+          excursion: "Organized excursion",
+          trabajo: "Work/Business",
+          educativo: "Educational trip",
+          otro: "Other",
+          redes: "Social networks",
+          web: "Official website",
+          recomendacion: "Recommendation",
+          hotel: "Hotel/tourism agency",
+          ruta: "Route signs",
+          producto: "Buy products"
+        },
+        pt: {
+          title: "Pesquisa de Oleoturismo - Outubro",
+          subtitle: "Questionário",
+          lbl_establecimiento: "Estabelecimento:",
+          lbl_pais: "1. País de residência:",
+          lbl_estadia: "2. Duração da estadia em Mendoza:",
+          lbl_motivo: "3. Principal motivo da visita:",
+          lbl_primera: "4. Primeira vez neste lagar?",
+          lbl_origen: "5. Como soube desta experiência?",
+          lbl_actividades: "6. Atividades realizadas:",
+          lbl_compra: "7. Comprou ou vai comprar produtos hoje aqui?",
+          lbl_gasto: "8. Gasto estimado (grupo):",
+          lbl_nps: "9. Voltaria ou recomendaria esta experiência? (0-10)",
+          lbl_edad: "10. Idade:",
+          btn_save: "Salvar pesquisa",
+          lbl_progress: "Progresso",
+          primera_si: "Sim",
+          primera_no: "Não",
+          compra_si: "Sim",
+          compra_no: "Não",
+          turismo: "Turismo/lazer",
+          excursion: "Excursão organizada",
+          trabajo: "Trabalho/negócios",
+          educativo: "Visita educativa",
+          otro: "Outro",
+          redes: "Redes sociais",
+          web: "Site do estabelecimento",
+          recomendacion: "Recomendação",
+          hotel: "Hotel/agência",
+          ruta: "Sinalização de rota",
+          producto: "Adquirir produtos"
+        }
+      };
+
+      const almazaras = [
+        { nombre: "LAUR", cupo: 47 },
+        { nombre: "Pasrai SRL Olivícola Boutique", cupo: 21 },
+        { nombre: "Olivícola Centenario", cupo: 18 },
+        { nombre: "Zuelo", cupo: 13 },
+        { nombre: "Olivícola Simone", cupo: 9 },
+        { nombre: "Finca El Paraíso de Luigi Bosca", cupo: 5 },
+        { nombre: "OliBô Aceite de Oliva V.E.", cupo: 5 },
+        { nombre: "Yancanelo", cupo: 5 },
+        { nombre: "MAGUAY", cupo: 5 },
+        { nombre: "LA MANTIA OLIVA", cupo: 3 },
+        { nombre: "CORAZÓN DE LUNLUNTA", cupo: 3 },
+        { nombre: "Almaoliva S.A", cupo: 3 },
+        { nombre: "Molino la Tebaida", cupo: 3 },
+        { nombre: "Nobile Rural", cupo: 2 },
+        { nombre: "Almazara Don Bosco", cupo: 2 },
+        { nombre: "La Aceitera", cupo: 2 },
+        { nombre: "Olivícola Moluá", cupo: 2 },
+        { nombre: "Bodega Familia Anronietti", cupo: 2 }
+      ];
+
+      let encuestas = [];
+
+      /* function poblarEstablecimientos() {
+        const sel = document.getElementById("establecimiento");
+        almazaras.forEach(a => {
+          const opt = document.createElement("option");
+          opt.value = a.nombre;
+          opt.textContent = `${a.nombre} (cupo ${a.cupo})`;
+          sel.appendChild(opt);
+        });
+        mostrarProgreso();
+      } */
+
+      async function guardarEncuesta() {
+        const datosFront = {
+          /* establecimiento: document.getElementById("establecimiento").value, */
+          pais: document.getElementById("pais").value,
+          estadia: document.getElementById("estadia").value,
+          motivo: document.getElementById("motivo").value,
+          primera: document.getElementById("primera").value,
+          origen: document.getElementById("origen").value,
+          actividades: document.getElementById("actividades").value,
+          compra: document.getElementById("compra").value,
+          gasto: document.getElementById("gasto").value,
+          nps: document.getElementById("nps").value,
+          edad: document.getElementById("edad").value
+        };
+
+        // Validaciones mínimas (podés ampliarlas)
+        /* if (datosFront.establecimiento) {
+          alert("Completá el Establecimiento.");
+          return;
+        } */
+        // Mapeo a lo que espera el backend
+        const body = {
+          /* establecimiento: datosFront.establecimiento, */               // str
+          pais_residencia: datosFront.pais || "",                    // str
+          duracion_estadia: datosFront.estadia || "",                // str
+          motivo_visita: datosFront.motivo || "",                    // str
+          primera_vez_almazara: datosFront.primera || "",            // "si"/"no" (texto)
+          como_conocio_experiencia: datosFront.origen || "",         // str
+          actividades_realizadas: datosFront.actividades || "",      // TEXT en backend
+          compra_productos: datosFront.compra || "",                 // "si"/"no" (texto)
+          gasto_estimado: datosFront.gasto || "",                    // categoría
+          puntaje_experiencia: Number(datosFront.nps || 0),          // 0..10
+          edad: datosFront.edad || "",                               // rango
+          // Si en el futuro agregás campo de "bodega" en el form:
+          // bodega: document.getElementById("bodega").value || ""
+        };
+
+        const btn = document.getElementById("btn_save");
+        btn.disabled = true;
+
+        const ctrl = new AbortController();
+        const timeout = setTimeout(() => ctrl.abort(), 15000);
+
+        try {
+          const res = await fetch(API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+            signal: ctrl.signal
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            throw new Error(data?.detail || "No se pudo enviar la encuesta");
+          }
+
+          encuestas.push({
+            /* establecimiento: body.establecimiento, */
+            pais: body.pais_residencia,
+            estadia: body.duracion_estadia,
+            motivo: body.motivo_visita,
+            primera: body.primera_vez_almazara,
+            origen: body.como_conocio_experiencia,
+            actividades: body.actividades_realizadas,
+            compra: body.compra_productos,
+            gasto: body.gasto_estimado,
+            nps: body.puntaje_experiencia,
+            edad: body.edad
+            // bodega: body.bodega
+          });
+
+          alert("¡Gracias! Encuesta enviada correctamente.");
+          mostrarProgreso();
+          // Opcional: limpiar el formulario
+          document.querySelector("form")?.reset();
+        } catch (err) {
+          alert(err.message || "Error de red. Intentá nuevamente.");
+        } finally {
+          clearTimeout(timeout);
+          btn.disabled = false;
+        }
+      }
+
+      function exportarCSV() {
+        if (encuestas.length === 0) {
+          alert("No hay encuestas para exportar (esta sesión).");
+          return;
+        }
+        const encabezados = Object.keys(encuestas[0]);
+        const filas = encuestas.map(obj =>
+          encabezados.map(h => `"${(obj[h] ?? "").toString().replace(/"/g, '""')}"`).join(",")
+        );
+        const csv = [encabezados.join(","), ...filas].join("\n");
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "encuestas_oleoturismo.csv";
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function setLanguage(lang) {
+        const t = translations?.[lang];
+        if (!t) return;
+
+        // helpers seguros
+        const setText = (id, value) => {
+          const el = document.getElementById(id);
+          if (el && typeof value === "string") el.textContent = value;
+        };
+        const setLabel = (id, value) => {
+          const lab = document.getElementById(id);
+          if (!lab || typeof value !== "string") return;
+          // buscamos el primer nodo de texto "principal" del label
+          let txt = null;
+          for (const n of lab.childNodes) {
+            if (n.nodeType === Node.TEXT_NODE) { txt = n; break; }
+          }
+          if (txt) txt.nodeValue = value + " ";
+          else lab.insertBefore(document.createTextNode(value + " "), lab.firstChild || null);
+        };
+
+        // títulos/botones (si existen en el DOM)
+        setText("title", t.title);
+        setText("subtitle", t.subtitle);
+        setText("btn_save", t.btn_save);
+        setText("btn_export", t.btn_export);
+        setText("lbl_progress", t.lbl_progress);
+        setText("primera_si", t.primera_si);
+        setText("primera_no", t.primera_no),
+        setText("compra_si", t.compra_si),
+        setText("compra_no", t.compra_no),
+        setText("turismo", t.turismo),
+        setText("excursion", t.excursion),
+        setText("trabajo", t.trabajo),
+        setText("educativo", t.educativo),
+        setText("otro", t.otro),
+        setText("redes", t.redes)
+        setText("web", t.web)
+        setText("recomendacion", t.recomendacion)
+        setText("hotel", t.hotel)
+        setText("ruta", t.ruta)
+        setText("producto", t.producto)
+      
+        // labels (si existen en el DOM)
+        setLabel("lbl_establecimiento", t.lbl_establecimiento);
+        setLabel("lbl_pais", t.lbl_pais);
+        setLabel("lbl_estadia", t.lbl_estadia);
+        setLabel("lbl_motivo", t.lbl_motivo);
+        setLabel("lbl_primera", t.lbl_primera);
+        setLabel("lbl_origen", t.lbl_origen);
+        setLabel("lbl_actividades", t.lbl_actividades);
+        setLabel("lbl_compra", t.lbl_compra);
+        setLabel("lbl_gasto", t.lbl_gasto);
+        setLabel("lbl_nps", t.lbl_nps);
+        setLabel("lbl_edad", t.lbl_edad);
+      }
+
+    </script>
+  </main>
+</body>
+
+</html>

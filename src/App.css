@@ -1,0 +1,70 @@
+html { background: #e8e3da; }
+
+.survey-shell {
+  display: grid;
+  justify-items: center;
+  padding-block: 2rem;
+}
+
+.survey-card {
+  width: 100%;
+  max-width: 780px;
+  background: transparent;
+  border: none;
+  padding: 1.25rem;
+}
+
+.survey-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.survey-logo {
+  display: block;
+  margin-inline: auto;
+  max-width: 280px;
+  height: auto;
+}
+
+.survey-header h2 {
+  margin: .5rem 0 1rem 0;
+}
+
+.lang-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  justify-content: center;
+  margin-bottom: .75rem;
+}
+.lang-buttons button {
+  background: #928b5f;
+  color: #fff;
+  border: 1px solid rgba(0,0,0,.15);
+  padding: .55rem .85rem;
+}
+
+form label { display: block; font-weight: 600; }
+form label + label { margin-top: .9rem; }
+
+*, *::before, *::after { box-sizing: border-box; }
+img, svg, video, canvas, iframe { max-width: 100%; height: auto; display: block; }
+.survey-card .grid > * { min-width: 0; }
+
+@media (min-width: 640px) {
+  .survey-card { padding: 1.5rem; }
+}
+@media (min-width: 992px) {
+  .survey-card { padding: 2rem; }
+}
+
+/* (Opcional) Centrado vertical suave en pantallas altas */
+/*
+.survey-shell {
+  min-height: 100dvh;
+  align-content: center;
+  padding-block: 3rem;
+}
+*/
+
+small.error { color: #b71c1c; display: block; }
