@@ -7,7 +7,7 @@ import "../App.css"
 import axios from "axios";
 import { getCountries } from "../utils/paises";
 import { AR_PROVINCES, type ARProvinceCode } from "../utils/provincias-ar";
-
+import logoMob from "../assets/Logo Mendoza Oliva Bien.png"
 
 const translations = {
   es: {
@@ -308,7 +308,7 @@ export default function Encuesta() {
   return (
     <main className="container survey-shell">
       <div className="survey-header">
-        <img className="survey-logo" src="/src/assets/Logo Mendoza Oliva Bien.png" alt="Mendoza Oliva Bien" />
+        <img className="survey-logo" src={logoMob} alt="Mendoza Oliva Bien" />
         <h2>{t.title}</h2>
         <div className="lang-buttons">
           <button type="button" onClick={() => setLang("es")}>🇪🇸 Español</button>
