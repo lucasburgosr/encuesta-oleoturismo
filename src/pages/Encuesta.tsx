@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import "../App.css"
@@ -68,6 +68,17 @@ const translations = {
         pareja: "En pareja",
         grupo: "Grupo de amigos/trabajo",
         familia_menores: "En familia (con menores de edad)"
+      },
+      actividades: {
+        naturales: "Visita a atractivos naturales",
+        ninguna: "Ninguna",
+        otras: "Otras Actividades",
+        bodegas_turismo_rural: "Visita a bodegas - Turismo rural",
+        aventura: "Turismo aventura",
+        gastronomia: "Gastronomía",
+        festivales: "Festivales y espectáculos",
+        compras: "Compras",
+        culturales: "Visita a atractivos culturales",
       }
     },
   },
@@ -129,6 +140,17 @@ const translations = {
         pareja: "Couple",
         grupo: "Friends/Work group",
         familia_menores: "Family (with minors)"
+      },
+      actividades: {
+        naturales: "Visit to natural attractions",
+        ninguna: "None",
+        otras: "Other activities",
+        bodegas_turismo_rural: "Winery visit – Rural tourism",
+        aventura: "Adventure tourism",
+        gastronomia: "Gastronomy",
+        festivales: "Festivals & shows",
+        compras: "Shopping",
+        culturales: "Visit to cultural attractions",
       }
     }
   },
@@ -190,10 +212,35 @@ const translations = {
         pareja: "Em casal",
         grupo: "Grupo de amigos/trabalho",
         familia_menores: "Em família (com menores)"
+      },
+      actividades: {
+        naturales: "Visita a atrativos naturais",
+        ninguna: "Nenhuma",
+        otras: "Outras atividades",
+        bodegas_turismo_rural: "Visita a vinícolas – Turismo rural",
+        aventura: "Turismo de aventura",
+        gastronomia: "Gastronomia",
+        festivales: "Festivais e espetáculos",
+        compras: "Compras",
+        culturales: "Visita a atrativos culturais",
       }
     }
   }
 } as const;
+
+const ACTIVIDADES_VALUES = [
+  "naturales",
+  "ninguna",
+  "otras",
+  "bodegas_turismo_rural",
+  "aventura",
+  "gastronomia",
+  "festivales",
+  "compras",
+  "culturales",
+] as const;
+
+const ActividadEnum = z.enum(ACTIVIDADES_VALUES);
 
 const normalizeAlmazara = (slug?: string) =>
   (slug ? decodeURIComponent(slug).replace(/-/g, " ").trim() : "");
@@ -208,7 +255,7 @@ const schema = z.object({
   motivo: emptyToUndef(z.enum(["turismo", "excursion", "trabajo", "educativo", "producto", "congreso", "otro"]).optional()),
   primera: emptyToUndef(z.enum(["si", "no"]).optional()),
   origen: emptyToUndef(z.enum(["redes", "web", "recomendacion", "hotel", "ruta", "otro"]).optional()),
-  actividades: z.string().optional().default(""),
+  actividades: z.array(ActividadEnum).optional().default([]),
   compra: emptyToUndef(z.enum(["si", "no"]).optional()),
   gasto: emptyToUndef(z.enum(["lt10k", "10k_25k", "25k_50k", "gt50k"]).optional()),
   nps: z.coerce.number().min(0, "Mínimo 0").max(10, "Máximo 10"),
@@ -216,7 +263,7 @@ const schema = z.object({
   edad: emptyToUndef(z.enum(["16-24", "25-34", "35-44", "45-54", "55-64", "65+"]).optional()),
   grupo: emptyToUndef(
     z.enum(["solo", "pareja", "grupo", "familia_menores"]).optional()
-  )
+  ),
 }).superRefine((data, ctx) => {
   if (data.pais === "AR" && !data.provincia) {
     ctx.addIssue({
@@ -238,6 +285,75 @@ const schema = z.object({
   }
 });
 
+type MSOption = { value: string; label: string };
+
+function MultiSelectDropdown({
+  value = [],
+  options,
+  onChange,
+  placeholder = "Seleccioná…",
+}: {
+  value: string[];
+  options: { value: string; label: string }[];
+  onChange: (v: string[]) => void;
+  placeholder?: string;
+}) {
+  const selected = options.filter(o => value.includes(o.value)).map(o => o.label);
+  const toggle = (val: string, checked: boolean) => {
+    onChange(checked ? Array.from(new Set([...value, val])) : value.filter(v => v !== val));
+  };
+
+  return (
+    <details className="ms ms-open" open>
+      {/* Evita que el usuario pueda cerrar/abrir */}
+      <summary
+        className={`ms-trigger ${selected.length ? "has-value" : ""}`}
+        onClick={(e) => e.preventDefault()}
+        aria-disabled="true"
+      >
+        {selected.length ? selected.join(", ") : placeholder}
+      </summary>
+
+      {/* Menú siempre visible */}
+      <div className="ms-menu ms-menu-open">
+        {options.map(opt => (
+          <label key={opt.value} className="ms-item">
+            <input
+              type="checkbox"
+              checked={value.includes(opt.value)}
+              onChange={(e) => toggle(opt.value, e.target.checked)}
+            />
+            <span>{opt.label}</span>
+          </label>
+        ))}
+      </div>
+    </details>
+  );
+}
+
+function MultiSelect({
+  name, control, options, placeholder,
+}: {
+  name: string;
+  control: any;
+  options: MSOption[];
+  placeholder?: string;
+}) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => (
+        <MultiSelectDropdown
+          value={(field.value as string[]) ?? []}
+          onChange={field.onChange}
+          options={options}
+          placeholder={placeholder}
+        />
+      )}
+    />
+  );
+}
 
 export default function Encuesta() {
   const { almazara } = useParams();
@@ -248,9 +364,25 @@ export default function Encuesta() {
 
   const t = translations[lang];
 
-  const { register, handleSubmit, watch, setValue, clearErrors, formState: { errors, isSubmitting }, reset } = useForm({
+  const actividadOptions = useMemo<MSOption[]>(() => ([
+    { value: "naturales", label: t.opts.actividades.naturales },
+    { value: "ninguna", label: t.opts.actividades.ninguna },
+    { value: "otras", label: t.opts.actividades.otras },
+    { value: "bodegas_turismo_rural", label: t.opts.actividades.bodegas_turismo_rural },
+    { value: "aventura", label: t.opts.actividades.aventura },
+    { value: "gastronomia", label: t.opts.actividades.gastronomia },
+    { value: "festivales", label: t.opts.actividades.festivales },
+    { value: "compras", label: t.opts.actividades.compras },
+    { value: "culturales", label: t.opts.actividades.culturales },
+  ]), [t]);
+
+
+  const {
+    register, handleSubmit, watch, setValue, clearErrors, control,
+    formState: { errors, isSubmitting }, reset
+  } = useForm({
     resolver: zodResolver(schema),
-    defaultValues: { compra: "" as any }
+    defaultValues: { compra: "", provincia: "", actividades: [] }
   });
 
   const paisSel = watch("pais")
@@ -317,8 +449,7 @@ export default function Encuesta() {
         </div>
       </div>
 
-      {/* Si querés mostrar el establecimiento (solo lectura), descomentá:
-      {establecimiento && (
+      {/* {establecimiento && (
         <label>
           Establecimiento:
           <input value={establecimiento} readOnly />
@@ -361,7 +492,7 @@ export default function Encuesta() {
           {provinciaSel !== "AR-M" && (
             <label>
               {t.lbl_motivo}
-              <select {...register("motivo")} defaultValue="">
+              <select {...register("motivo", { setValueAs: v => v || undefined })}>
                 <option value="">{t.opts.select}</option>
                 <option value="turismo">{t.opts.motivo.turismo}</option>
                 <option value="excursion">{t.opts.motivo.excursion}</option>
@@ -376,7 +507,7 @@ export default function Encuesta() {
 
           <label>
             {t.lbl_primera}
-            <select {...register("primera")} defaultValue="">
+            <select {...register("primera", { setValueAs: v => v || undefined })}>
               <option value="">{t.opts.select}</option>
               <option value="si">{t.opts.si}</option>
               <option value="no">{t.opts.no}</option>
@@ -385,7 +516,7 @@ export default function Encuesta() {
 
           <label>
             {t.lbl_origen}
-            <select {...register("origen")} defaultValue="">
+            <select {...register("origen", { setValueAs: v => v || undefined })}>
               <option value="">{t.opts.select}</option>
               <option value="redes">{t.opts.origen.redes}</option>
               <option value="web">{t.opts.origen.web}</option>
@@ -398,12 +529,18 @@ export default function Encuesta() {
 
           <label>
             {t.lbl_actividades}
-            <input {...register("actividades")} type="text" placeholder={t.ph_actividades} />
+            <MultiSelect
+              name="actividades"
+              control={control}
+              options={actividadOptions}
+              placeholder={t.opts.select}
+            />
+            {errors.actividades && <small className="error">{String(errors.actividades.message)}</small>}
           </label>
 
           <label>
             {t.lbl_compra}
-            <select {...register("compra")} defaultValue="">
+            <select {...register("compra", { setValueAs: v => v || undefined })}>
               <option value="">{t.opts.select}</option>
               <option value="si">{t.opts.si}</option>
               <option value="no">{t.opts.no}</option>
@@ -412,7 +549,7 @@ export default function Encuesta() {
 
           <label>
             {t.lbl_gasto}
-            <select {...register("gasto")} defaultValue="">
+            <select {...register("gasto", { setValueAs: v => v || undefined })}>
               <option value="">{t.opts.select}</option>
               <option value="lt10k">{t.opts.gasto.lt10k}</option>
               <option value="10k_25k">{t.opts.gasto["10k_25k"]}</option>
@@ -435,7 +572,7 @@ export default function Encuesta() {
 
           <label>
             {t.lbl_edad}
-            <select {...register("edad")} defaultValue="">
+            <select {...register("edad", { setValueAs: v => v || undefined })}>
               <option value="">{t.opts.select}</option>
               <option value="16-24">{t.opts.edad["16-24"]}</option>
               <option value="25-34">{t.opts.edad["25-34"]}</option>
@@ -448,7 +585,7 @@ export default function Encuesta() {
 
           <label>
             {t.lbl_grupo}
-            <select {...register("grupo")} defaultValue="">
+            <select {...register("grupo", { setValueAs: v => v || undefined })}>
               <option value="">{t.opts.select}</option>
               <option value="solo">{t.opts.grupo.solo}</option>
               <option value="pareja">{t.opts.grupo.pareja}</option>

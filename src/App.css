@@ -68,3 +68,27 @@ img, svg, video, canvas, iframe { max-width: 100%; height: auto; display: block;
 */
 
 small.error { color: #b71c1c; display: block; }
+
+.ms.ms-open .ms-trigger {
+  display: none !important;
+}
+
+/* Como ya no hay summary, quitamos el espacio superior del menú */
+.ms.ms-open .ms-menu {
+  margin-top: 0;
+}
+
+.ms-menu, .ms-item { 
+  transition: none !important;
+}
+
+.ms-menu {
+  box-shadow: none;
+  will-change: auto;
+}
+
+.ms-item input {
+  transition: none !important;
+}
+
+label > * { margin-top: 12px; }
