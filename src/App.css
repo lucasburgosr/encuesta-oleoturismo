@@ -58,6 +58,17 @@ img, svg, video, canvas, iframe { max-width: 100%; height: auto; display: block;
   .survey-card { padding: 2rem; }
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pico-background-color: #101418;
+    --pico-color: #e5e7eb;
+    --pico-muted-color: #a7b0bd;
+    --pico-form-element-background-color: #171b21;
+    --pico-form-element-border-color: #2b3240;
+  }
+  .survey-card { background: transparent; } /* ya la tenías transparente */
+}
+
 /* (Opcional) Centrado vertical suave en pantallas altas */
 /*
 .survey-shell {
